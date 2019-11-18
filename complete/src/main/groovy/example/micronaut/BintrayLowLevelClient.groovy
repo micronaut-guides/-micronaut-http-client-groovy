@@ -26,7 +26,7 @@ class BintrayLowLevelClient {
 
     Maybe<List<BintrayPackage>> fetchPackages() {
         HttpRequest<?> req = HttpRequest.GET(uri) // <4>
-        Flowable flowable = httpClient.retrieve(req, Argument.of(List, BintrayPackage)) // <5>
+        Flowable flowable = httpClient.retrieve(req, Argument.listOf(BintrayPackage)) // <5>
         flowable.firstElement() as Maybe<List<BintrayPackage>> // <6>
     }
 }
