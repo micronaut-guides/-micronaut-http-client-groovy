@@ -7,8 +7,8 @@ plugins {
 version "0.1"
 group "example.micronaut"
 
-
 repositories {
+    mavenCentral()
     jcenter()
 }
 
@@ -18,29 +18,31 @@ configurations {
 }
 
 dependencies {
-    compileOnly(enforcedPlatform("io.micronaut:micronaut-bom:$micronautVersion"))
+    compileOnly(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     compileOnly("io.micronaut:micronaut-inject-groovy")
-    implementation(enforcedPlatform("io.micronaut:micronaut-bom:$micronautVersion"))
+    implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     implementation("io.micronaut:micronaut-inject")
     implementation("io.micronaut:micronaut-validation")
-    implementation("io.micronaut:micronaut-runtime-groovy")
+    implementation("io.micronaut.groovy:micronaut-runtime-groovy")
     implementation("io.micronaut:micronaut-http-server-netty")
     implementation("io.micronaut:micronaut-http-client")
-    runtimeOnly("ch.qos.logback:logback-classic:1.2.3")
-    testImplementation enforcedPlatform("io.micronaut:micronaut-bom:$micronautVersion")
+    runtimeOnly("ch.qos.logback:logback-classic")
+    testImplementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     testImplementation("io.micronaut:micronaut-inject-groovy")
     testImplementation("org.spockframework:spock-core") {
         exclude group: "org.codehaus.groovy", module: "groovy-all"
     }
-    testImplementation("io.micronaut:micronaut-inject-groovy")
     testImplementation("io.micronaut.test:micronaut-test-spock")
-    testImplementation("io.micronaut.test:micronaut-test-junit5")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.5.0")
 }
 
 test.classpath += configurations.developmentOnly
 
 mainClassName = "example.micronaut.Application"
+
+// use JUnit 5 platform
+test {
+    useJUnitPlatform()
+}
 
 java {
     sourceCompatibility = JavaVersion.toVersion('1.8')
@@ -58,6 +60,13 @@ shadowJar {
 tasks.withType(JavaExec) {
     classpath += configurations.developmentOnly
     jvmArgs('-XX:TieredStopAtLevel=1', '-Dcom.sun.management.jmxremote')
+    if (gradle.startParameter.continuous) {
+        systemProperties(
+            'micronaut.io.watch.restart':'true',
+            'micronaut.io.watch.enabled':'true',
+            "micronaut.io.watch.paths":"src/main"
+        )
+    }
 }
 
 
